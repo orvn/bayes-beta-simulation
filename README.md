@@ -1,15 +1,19 @@
 # Bayes Beta Simulation
 
+[![Cloudflare Pages](https://img.shields.io/badge/Cloudflare%20Pages-F38020?style=flat&logo=cloudflare&logoColor=white)](https://bayes-beta.pages.dev)
+
 Simulation of beta distribution using n tosses of a biased coin.
 
-Public URL [bayes-beta-simulation.pages.dev](https://bayes-beta.pages.dev)
+🔗 **Public URL** [bayes-beta-simulation.pages.dev](https://bayes-beta-simulation.pages.dev)
 
 ## Static
+
+This project contains a static site, to build it:
 
 ```sh
 bun run build
 ```
-Buids static site at `./_site/`
+Builds static site at `./_site/`
 
 
 ## Development
