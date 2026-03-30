@@ -87,6 +87,10 @@ path.prev {
   z-index: -1;
 }
 
+.toss {
+  font-family: monospace;
+}
+
 .toss.heads {
   fill: red;
 }
