@@ -46,16 +46,14 @@ const yAxis = d3.svg.axis().scale(y).orient("left");
 const svgPath = d3
   .select("body")
   .append("svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom)
+  .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
   .append("g")
   .attr("transform", `translate(${margin.left},${margin.top})`);
 
 const svgText = d3
   .select("body")
   .append("svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", 75)
+  .attr("viewBox", `0 0 ${width + margin.left + margin.right} 75`)
   .append("g")
   .attr("transform", `translate(${margin.left},${margin.top})`);
 
