@@ -1,14 +1,26 @@
-# bayes-beta-simulation
+# Bayes Beta Simulation
 
 Simulation of beta distribution using n tosses of a biased coin.
 
-## Run locally (Bun)
+## Static
 
-Requires [Bun](https://bun.sh/). From the repo root:
+```sh
+bun run build
+```
+Buids static site at `_site/`
+
+
+## Development
+
+Requires [Bun](https://bun.sh/) (or any Node-compatible runner)
 
 ```sh
 bun install
 bun run dev
 ```
 
-Open [http://localhost:6800/](http://localhost:6800/) (override port with `PORT=8080 bun run dev`). The page is still [`bayes-beta.htm`](bayes-beta.htm); the dev server only serves it so the app loads D3 over HTTPS without file:// quirks.
+11ty then serves the dev site at `:6800`
+
+#### Source
+
+This project was originally recovered from a now unavailable resource on [bl.ocks.org](http://bl.ocks.org/joost2076/raw/7b0bd5c566b3a349854e/)
