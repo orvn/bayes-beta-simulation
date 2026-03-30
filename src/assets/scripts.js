@@ -1,62 +1,73 @@
-// http://bl.ocks.org/mbostock/3883245 : line chart
-// http://bl.ocks.org/mbostock/3884955 : series of line charts
+/**
+ * Line chart references (original bl.ocks):
+ * https://bl.ocks.org/mbostock/3883245
+ * https://bl.ocks.org/mbostock/3884955
+ */
 
-var bias = 0.15,
-  numTrialsForUpdate = 1,
-  n = 0,
-  k = 0,
-  ymax,
-  coin;
-var grid = d3.range(0, 1.005, 1 / 200);
-var f = [];
-var data = [];
+"use strict";
 
-var margin = { top: 15, right: 50, bottom: 50, left: 50 },
-  width = 1000 - margin.left - margin.right,
-  height = 600 - margin.top - margin.bottom;
+const GRID_STEP = 1 / 200;
+const TOTAL_FLIPS = 150;
+const TICK_MS = 125;
+const TOSS_COLS = 50;
+const TOSS_X0 = 200;
+const TOSS_LINE_HEIGHT = 12;
+const TOSS_Y0 = 10;
+const BIAS_GRID_INDEX_SCALE = 0.005;
 
-var x = d3.scale.linear().range([0, width]);
+const grid = d3.range(0, 1.005, GRID_STEP);
+const factorialMemo = [];
 
-var y = d3.scale.linear().range([height, 0]);
+const margin = { top: 15, right: 50, bottom: 50, left: 50 };
+const width = 1000 - margin.left - margin.right;
+const height = 600 - margin.top - margin.bottom;
 
-var line = d3.svg
+let bias = 0.15;
+const numTrialsForUpdate = 1;
+let n = 0;
+let k = 0;
+let ymax;
+let coin;
+
+let data = [];
+let tosses = [];
+
+const x = d3.scale.linear().range([0, width]);
+const y = d3.scale.linear().range([height, 0]);
+
+const line = d3.svg
   .line()
-  .x(function (d) {
-    return x(d.x);
-  })
-  .y(function (d) {
-    return y(d.y);
-  });
+  .x((d) => x(d.x))
+  .y((d) => y(d.y));
 
-var xAxis = d3.svg.axis().scale(x).orient("bottom");
+const xAxis = d3.svg.axis().scale(x).orient("bottom");
+const yAxis = d3.svg.axis().scale(y).orient("left");
 
-var yAxis = d3.svg.axis().scale(y).orient("left");
-
-var svg_path = d3
+const svgPath = d3
   .select("body")
   .append("svg")
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
   .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  .attr("transform", `translate(${margin.left},${margin.top})`);
 
-var svg_text = d3
+const svgText = d3
   .select("body")
   .append("svg")
   .attr("width", width + margin.left + margin.right)
   .attr("height", 75)
   .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  .attr("transform", `translate(${margin.left},${margin.top})`);
 
 x.domain([0, 1]);
 
-svg_path
+svgPath
   .append("g")
   .attr("class", "x axis")
-  .attr("transform", "translate(0," + height + ")")
+  .attr("transform", `translate(0,${height})`)
   .call(xAxis);
 
-svg_path
+svgPath
   .append("g")
   .attr("class", "y axis")
   .call(yAxis)
@@ -64,143 +75,114 @@ svg_path
   .attr("transform", "rotate(-90)")
   .attr("y", 6)
   .attr("dy", ".71em");
-var timeoutNr;
 
-var tosses = [];
+let timeoutId;
+
+/** Exposed for the start button (`onclick` in HTML). */
 function myLoop(i) {
-  if (i == 1) {
-    clearTimeout(timeoutNr);
+  if (i === 1) {
+    clearTimeout(timeoutId);
     ymax = 8;
     y.domain([0, ymax]);
-    svg_path.select(".y.axis").call(yAxis);
+    svgPath.select(".y.axis").call(yAxis);
     bias = document.getElementById("bias").value;
-    svg_text.selectAll("text").remove();
-    svg_path.selectAll("path.trial").remove();
-    (n = 0), (k = 0);
+    svgText.selectAll("text").remove();
+    svgPath.selectAll("path.trial").remove();
+    n = 0;
+    k = 0;
     data = [];
     data.push({
-      trial: "num" + n,
-      values: grid.map(function (d) {
-        return { x: d, y: 1 };
-      }),
+      trial: `num${n}`,
+      values: grid.map((d) => ({ x: d, y: 1 })),
     });
     tosses = [];
   }
-  timeoutNr = setTimeout(function () {
+
+  timeoutId = setTimeout(() => {
     sim(numTrialsForUpdate);
     data.push({
-      trial: "num" + n,
-      info: "flips:" + n + " heads:" + k,
-      values: grid.map(function (d) {
-        return { x: d, y: BETA(d) };
-      }),
+      trial: `num${n}`,
+      info: `flips:${n} heads:${k}`,
+      values: grid.map((d) => ({ x: d, y: BETA(d) })),
     });
 
-    var t = data[data.length - 1].values.reduce(function (p, d) {
-      return d.y > p.y ? d : p;
-    });
+    const last = data[data.length - 1];
+    const t = last.values.reduce((p, d) => (d.y > p.y ? d : p));
 
-    var trials = svg_path.selectAll("path.trial").data(data, function (d) {
-      return d.trial;
-    });
+    const trials = svgPath.selectAll("path.trial").data(data, (d) => d.trial);
+    const text = svgText.selectAll(".toss").data(tosses);
 
-    var text = svg_text.selectAll(".toss").data(tosses);
-
-    var t_enter = text.enter();
-    t_enter
+    text
+      .enter()
       .append("text")
-      .attr("class", function (d) {
-        return d === "H" ? "toss heads" : "toss tails";
-      })
-      .attr("id", function () {
-        return "l" + n;
-      })
-      .attr("x", function (d, i) {
-        return (i % 50) * 10 + 200;
-      })
-      .attr("y", function (d, i) {
-        return 10 + 12 * Math.floor(i / 50);
-      })
-      .text(function (d) {
-        return d;
-      })
+      .attr("class", (d) => (d === "H" ? "toss heads" : "toss tails"))
+      .attr("id", () => `l${n}`)
+      .attr("x", (d, i) => (i % TOSS_COLS) * 10 + TOSS_X0)
+      .attr("y", (d, i) => TOSS_Y0 + TOSS_LINE_HEIGHT * Math.floor(i / TOSS_COLS))
+      .text((d) => d)
       .on("mouseover", function () {
-        var id = this.id.slice(1, 4);
-        d3.select("#num" + id).classed("active", true);
-        info(id);
+        const flipId = this.id.slice(1, 4);
+        d3.select(`#num${flipId}`).classed("active", true);
+        info(flipId);
       })
       .on("mouseout", function () {
-        var id = this.id.slice(1, 4);
-        d3.select("#num" + id).classed("active", false);
+        const flipId = this.id.slice(1, 4);
+        d3.select(`#num${flipId}`).classed("active", false);
         d3.select("#info").text("hover flip to see info");
       });
 
     if (t.y > ymax) {
       ymax = t.y + 2;
       y.domain([0, ymax]);
-      svg_path.select(".y.axis").transition().duration(125).call(yAxis);
+      svgPath.select(".y.axis").transition().duration(125).call(yAxis);
 
       trials
         .transition()
         .duration(100)
-        .attr("d", function (d) {
-          return line(d.values);
-        })
+        .attr("d", (d) => line(d.values))
         .attr("class", "trial prev");
     } else {
       trials.transition().duration(100).attr("class", "trial prev");
     }
 
-    var trials_enter = trials.enter();
-
-    trials_enter
+    trials
+      .enter()
       .append("path")
       .attr("class", "trial")
-      .attr("d", function (d) {
-        return line(data[data.length - 2].values);
-      })
-      .attr("id", function (d) {
-        return d.trial;
-      });
+      .attr("d", () => line(data[data.length - 2].values))
+      .attr("id", (d) => d.trial);
 
-    var anim = svg_path.select("path#num" + n);
-    anim
+    svgPath
+      .select(`path#num${n}`)
       .transition()
       .ease("linear")
       .duration(100)
-      .attr("d", function (d) {
-        return line(d.values);
-      });
+      .attr("d", (d) => line(d.values));
 
-    info(n - 1);
+    info(String(n - 1));
 
-    if (++i < 151 / numTrialsForUpdate) myLoop(i);
-  }, 125);
+    i += 1;
+    if (i < (TOTAL_FLIPS + 1) / numTrialsForUpdate) {
+      myLoop(i);
+    }
+  }, TICK_MS);
 }
 
 function info(id) {
-  var t = data[id].values.reduce(function (p, d) {
-    return d.y > p.y ? d : p;
-  });
+  const row = data[id];
+  const mode = row.values.reduce((p, d) => (d.y > p.y ? d : p));
   d3.select("#info").text(
-    "MAX at: " +
-      t.x.toFixed(3) +
-      " with density: " +
-      t.y.toFixed(4) +
-      " " +
-      data[id].info
+    `MAX at: ${mode.x.toFixed(3)} with density: ${mode.y.toFixed(4)} ${row.info}`
   );
-  var pos = parseInt(bias / 0.005);
+  const idx = parseInt(String(Number(bias) / BIAS_GRID_INDEX_SCALE), 10);
+  const atBias = row.values[idx];
   d3.select("#info2").text(
-    "density at bias: " +
-      data[id].values[pos].x.toFixed(4) +
-      ", " +
-      data[id].values[pos].y.toFixed(4)
+    `density at bias: ${atBias.x.toFixed(4)}, ${atBias.y.toFixed(4)}`
   );
 }
 
 function sim(numTrials) {
-  for (var i = 0; i < numTrials; i++) {
+  for (let i = 0; i < numTrials; i += 1) {
     n += 1;
     coin = Math.random() < bias ? "H" : "T";
     k = coin === "H" ? k + 1 : k;
@@ -208,14 +190,16 @@ function sim(numTrials) {
   }
 }
 
-function factorial(n) {
-  if (n == 0 || n == 1) return 1;
-  if (f[n] > 0) return f[n];
-  return (f[n] = factorial(n - 1) * n);
+function factorial(m) {
+  if (m === 0 || m === 1) return 1;
+  if (factorialMemo[m] > 0) return factorialMemo[m];
+  factorialMemo[m] = factorial(m - 1) * m;
+  return factorialMemo[m];
 }
 
 function BETA(theta) {
-  var norm = (factorial(k) * factorial(n - k)) / factorial(n + 1);
-  var ptimesl = Math.pow(theta, k) * Math.pow(1 - theta, n - k);
-  return ptimesl / norm;
+  const norm =
+    (factorial(k) * factorial(n - k)) / factorial(n + 1);
+  const likelihood = theta ** k * (1 - theta) ** (n - k);
+  return likelihood / norm;
 }
