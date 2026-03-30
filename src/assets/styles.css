@@ -1,20 +1,75 @@
+@import url("https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap");
+
+/* --- small reset --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
-  font: 15px Verdana;
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+svg {
+  margin-inline: auto;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+/* --- page --- */
+body {
+  font-family: Calibri, "Segoe UI", system-ui, sans-serif;
+  font-size: 0.9375rem; /* 15px at 16px root */
   text-align: center;
+}
+
+h1 {
+  font-family: "Lora", Georgia, "Times New Roman", serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: 0.75rem;
+}
+
+p {
+  margin-bottom: 0.5rem;
 }
 
 .axis path,
 .axis line {
   fill: none;
   stroke: grey;
-  stroke-width: 1;
+  stroke-width: 0.0625rem;
   shape-rendering: crispEdges;
 }
 
 .trial {
   fill: none;
   stroke: steelblue;
-  stroke-width: 2px;
+  stroke-width: 0.125rem;
 }
 
 .prev.active {
@@ -24,16 +79,11 @@ body {
   z-index: 1;
 }
 
-svg {
-  display: block;
-  margin: auto;
-}
-
 path.prev {
   fill: none;
   stroke: red;
   opacity: 0.2;
-  stroke-width: 2px;
+  stroke-width: 0.125rem;
   z-index: -1;
 }
 
@@ -47,19 +97,14 @@ path.prev {
 
 input {
   background-color: #aadab7;
-  border-radius: 5px;
-  border: 1px solid black;
+  border-radius: 0.3125rem;
+  border: 0.0625rem solid black;
   display: inline-block;
   color: black;
-  font-family: arial;
-  font-size: 15px;
+  font-size: 0.9375rem;
   text-align: center;
 }
 
 #bias {
-  width: 40px;
-}
-
-div {
-  float: center;
+  width: 2.5rem;
 }
