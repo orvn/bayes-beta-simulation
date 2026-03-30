@@ -2,7 +2,7 @@
 
 Simulation of beta distribution using n tosses of a biased coin.
 
-Public URL [bayes-beta.pages.dev](https://bayes-beta.pages.dev)
+Public URL [bayes-beta-simulation.pages.dev](https://bayes-beta.pages.dev)
 
 ## Static
 

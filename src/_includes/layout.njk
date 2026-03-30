@@ -4,70 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ title }}</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
   <script src="https://d3js.org/d3.v3.min.js"></script>
-  <style>
-    body {
-      font: 15px Verdana;
-      text-align: center;
-    }
-
-    .axis path,
-    .axis line {
-      fill: none;
-      stroke: grey;
-      stroke-width: 1;
-      shape-rendering: crispEdges;
-    }
-
-    .trial {
-      fill: none;
-      stroke: steelblue;
-      stroke-width: 2px;
-    }
-
-    .prev.active {
-      fill: rgb(239, 205, 119);
-      opacity: 0.90;
-      stroke: black;
-      z-index: 1;
-    }
-
-    svg {
-      display: block;
-      margin: auto;
-    }
-
-    path.prev {
-      fill: none;
-      stroke: red;
-      opacity: 0.2;
-      stroke-width: 2px;
-      z-index: -1;
-    }
-
-    .toss.heads {
-      fill: red;
-    }
-
-    .toss.tails {
-      fill: blue;
-    }
-
-    input {
-      background-color: #AADAB7;
-      border-radius: 5px;
-      border: 1px solid black;
-      display: inline-block;
-      color: black;
-      font-family: arial;
-      font-size: 15px;
-      text-align: center;
-    }
-
-    div {
-      float: center;
-    }
-  </style>
 </head>
 <body>
   {{ content | safe }}

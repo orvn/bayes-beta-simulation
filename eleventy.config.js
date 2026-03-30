@@ -4,6 +4,10 @@ export default function (eleventyConfig) {
     port: 6800,
   });
 
+  eleventyConfig.addPassthroughCopy({
+    "src/assets": "assets",
+  });
+
   return {
     dir: {
       input: "src",
