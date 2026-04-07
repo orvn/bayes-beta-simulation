@@ -25,7 +25,8 @@ const height = 600 - margin.top - margin.bottom;
 let bias = 0.15;
 const numTrialsForUpdate = 1;
 let n = 0;
-let k = 0;
+let H = 0;
+let T = 0;
 let ymax;
 let coin;
 
@@ -87,7 +88,8 @@ function myLoop(i) {
     svgText.selectAll("text").remove();
     svgPath.selectAll("path.trial").remove();
     n = 0;
-    k = 0;
+    H = 0;
+    T = 0;
     data = [];
     data.push({
       trial: `num${n}`,
@@ -100,7 +102,7 @@ function myLoop(i) {
     sim(numTrialsForUpdate);
     data.push({
       trial: `num${n}`,
-      info: `flips:${n} heads:${k}`,
+      info: `flips:${n} heads:${H} tails:${T}`,
       values: grid.map((d) => ({ x: d, y: BETA(d) })),
     });
 
@@ -157,7 +159,7 @@ function myLoop(i) {
       .duration(100)
       .attr("d", (d) => line(d.values));
 
-    info(String(n - 1));
+    info(String(n));
 
     i += 1;
     if (i < (TOTAL_FLIPS + 1) / numTrialsForUpdate) {
@@ -183,7 +185,11 @@ function sim(numTrials) {
   for (let i = 0; i < numTrials; i += 1) {
     n += 1;
     coin = Math.random() < bias ? "H" : "T";
-    k = coin === "H" ? k + 1 : k;
+    if (coin === "H") {
+      H += 1;
+    } else {
+      T += 1;
+    }
     tosses.push(coin);
   }
 }
@@ -197,7 +203,7 @@ function factorial(m) {
 
 function BETA(theta) {
   const norm =
-    (factorial(k) * factorial(n - k)) / factorial(n + 1);
-  const likelihood = theta ** k * (1 - theta) ** (n - k);
+    (factorial(H) * factorial(n - H)) / factorial(n + 1);
+  const likelihood = theta ** H * (1 - theta) ** (n - H);
   return likelihood / norm;
 }
